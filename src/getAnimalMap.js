@@ -4,86 +4,60 @@ const { species } = data;
 
 const createObjectLocales = () => {
   const filterAnimal = {};
-
   species.forEach((animal) => {
     filterAnimal[animal.location] = [];
   });
   return filterAnimal;
 };
 
-const includeNamesFalse = (object) => {
+const notIncludeNames = (object) => {
   Object.keys(object).forEach((key) => species.forEach((animal) => {
     if (animal.location === key) {
       object[key].push(animal.name);
     }
   }));
-
   return object;
 };
 
-const includeNamesTrue = (object) => {
-  Object.keys(object).forEach((key) => species.forEach((animal) => {
-    const animalNames = {};
-    if (animal.location === key) {
-      animalNames[animal.name] = animal.residents.map((resident) => resident.name);
-      object[key].push(animalNames);
-    }
-  }));
-
-  return object;
+const sortedData = (animal, options) => {
+  if (options.sex === undefined && options.sorted === true) {
+    return animal.residents.map((resident) => resident.name).sort();
+  }
+  return animal.residents.filter((resident) =>
+    resident.sex === options.sex).map((residentsCurr) => residentsCurr.name).sort();
 };
 
-const includeNamesTrueSorted = (object) => {
-  Object.keys(object).forEach((key) => species.forEach((animal) => {
-    const animalNames = {};
-    if (animal.location === key) {
-      animalNames[animal.name] = animal.residents.map((resident) => resident.name).sort();
-      object[key].push(animalNames);
-    }
-  }));
+const changedata = (animal, options) => {
+  if (options.sex === undefined && options.sorted === undefined) {
+    return animal.residents.map((resident) => resident.name);
+  }
 
-  return object;
+  if (options.sex !== undefined && options.sorted === undefined) {
+    return animal.residents.filter((resident) =>
+      resident.sex === options.sex).map((residentsCurr) => residentsCurr.name);
+  }
+  return sortedData(animal, options);
 };
 
-const includeNamesTrueSex = (object) => {
+const includeNames = (object, options) => {
   Object.keys(object).forEach((key) => species.forEach((animal) => {
     const animalNames = {};
     if (animal.location === key) {
-      animalNames[animal.name] = animal.residents.filter((resident) =>
-        resident.sex === 'female').map((residentsCurr) => residentsCurr.name);
+      animalNames[animal.name] = changedata(animal, options);
       object[key].push(animalNames);
     }
   }));
-
-  return object;
-};
-
-const includeNamesTrueSortedSex = (object) => {
-  Object.keys(object).forEach((key) => species.forEach((animal) => {
-    const animalNames = {};
-    if (animal.location === key) {
-      animalNames[animal.name] = animal.residents.filter((resident) =>
-        resident.sex === 'female').map((residentsCurr) => residentsCurr.name).sort();
-      object[key].push(animalNames);
-    }
-  }));
-
   return object;
 };
 
 function getAnimalMap(options) {
   const filterAnimal = createObjectLocales();
-
   if (!options || options.includeNames === undefined) {
-    includeNamesFalse(filterAnimal);
+    notIncludeNames(filterAnimal);
+  } else {
+    includeNames(filterAnimal, options);
   }
   return filterAnimal;
 }
 
 module.exports = getAnimalMap;
-
-console.log(getAnimalMap({ includeNames: true, sex: 'female', sorted: true }));
-console.log(includeNamesTrue());
-console.log(includeNamesTrueSorted());
-console.log(includeNamesTrueSex());
-console.log(includeNamesTrueSortedSex());
