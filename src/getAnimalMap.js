@@ -2,100 +2,88 @@ const data = require('../data/zoo_data');
 
 const { species } = data;
 
-const includeNamesFalse = () => {
+const createObjectLocales = () => {
   const filterAnimal = {};
 
   species.forEach((animal) => {
     filterAnimal[animal.location] = [];
   });
-
-  Object.keys(filterAnimal).forEach((key) => species.forEach((animal) => {
-    if (animal.location === key) {
-      filterAnimal[key].push(animal.name);
-    }
-  }));
-
   return filterAnimal;
 };
 
-const includeNamesTrue = () => {
-  const filterAnimal = {};
+const includeNamesFalse = (object) => {
+  Object.keys(object).forEach((key) => species.forEach((animal) => {
+    if (animal.location === key) {
+      object[key].push(animal.name);
+    }
+  }));
 
-  species.forEach((animal) => {
-    filterAnimal[animal.location] = [];
-  });
+  return object;
+};
 
-  Object.keys(filterAnimal).forEach((key) => species.forEach((animal) => {
+const includeNamesTrue = (object) => {
+  Object.keys(object).forEach((key) => species.forEach((animal) => {
     const animalNames = {};
     if (animal.location === key) {
       animalNames[animal.name] = animal.residents.map((resident) => resident.name);
-      filterAnimal[key].push(animalNames);
+      object[key].push(animalNames);
     }
   }));
 
-  return filterAnimal;
+  return object;
 };
 
-const includeNamesTrueSorted = () => {
-  const filterAnimal = {};
-
-  species.forEach((animal) => {
-    filterAnimal[animal.location] = [];
-  });
-
-  Object.keys(filterAnimal).forEach((key) => species.forEach((animal) => {
+const includeNamesTrueSorted = (object) => {
+  Object.keys(object).forEach((key) => species.forEach((animal) => {
     const animalNames = {};
     if (animal.location === key) {
       animalNames[animal.name] = animal.residents.map((resident) => resident.name).sort();
-      filterAnimal[key].push(animalNames);
+      object[key].push(animalNames);
     }
   }));
 
-  return filterAnimal;
+  return object;
 };
 
-const includeNamesTrueSex = () => {
-  const filterAnimal = {};
-
-  species.forEach((animal) => {
-    filterAnimal[animal.location] = [];
-  });
-
-  Object.keys(filterAnimal).forEach((key) => species.forEach((animal) => {
+const includeNamesTrueSex = (object) => {
+  Object.keys(object).forEach((key) => species.forEach((animal) => {
     const animalNames = {};
     if (animal.location === key) {
       animalNames[animal.name] = animal.residents.filter((resident) =>
         resident.sex === 'female').map((residentsCurr) => residentsCurr.name);
-      filterAnimal[key].push(animalNames);
+      object[key].push(animalNames);
     }
-    console.log(animalNames);
   }));
 
-  return filterAnimal;
+  return object;
 };
 
-const includeNamesTrueSortedSex = () => {
-  const filterAnimal = {};
-
-  species.forEach((animal) => {
-    filterAnimal[animal.location] = [];
-  });
-
-  Object.keys(filterAnimal).forEach((key) => species.forEach((animal) => {
+const includeNamesTrueSortedSex = (object) => {
+  Object.keys(object).forEach((key) => species.forEach((animal) => {
     const animalNames = {};
     if (animal.location === key) {
       animalNames[animal.name] = animal.residents.filter((resident) =>
         resident.sex === 'female').map((residentsCurr) => residentsCurr.name).sort();
-      filterAnimal[key].push(animalNames);
+      object[key].push(animalNames);
     }
-    console.log(animalNames);
   }));
 
-  return filterAnimal;
+  return object;
 };
 
 function getAnimalMap(options) {
-  
+  const filterAnimal = createObjectLocales();
+
+  if (!options || options.includeNames === undefined) {
+    includeNamesFalse(filterAnimal);
+  }
+  return filterAnimal;
 }
 
 module.exports = getAnimalMap;
+
+console.log(getAnimalMap({ includeNames: true, sex: 'female', sorted: true }));
+console.log(includeNamesTrue());
+console.log(includeNamesTrueSorted());
+console.log(includeNamesTrueSex());
+console.log(includeNamesTrueSortedSex());
