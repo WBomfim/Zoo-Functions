@@ -1,16 +1,13 @@
-const data = require('../data/zoo_data');
+const { employees } = require('../data/zoo_data');
 
-const { employees } = data;
-
-function isManager(id) {
-  return employees.some((employee) => employee.managers.includes(id));
+function isManager(employeeId) {
+  return employees.some(({ managers }) => managers.includes(employeeId));
 }
 
-function getRelatedEmployees(managerId) {
-  if (isManager(managerId)) {
-    return employees.filter((employee) =>
-      employee.managers.includes(managerId)).map((employee) =>
-      `${employee.firstName} ${employee.lastName}`);
+function getRelatedEmployees(employeeId) {
+  if (isManager(employeeId)) {
+    return employees.filter(({ managers }) => managers.includes(employeeId))
+      .map(({ firstName, lastName }) => `${firstName} ${lastName}`);
   }
   throw new Error('O id inserido não é de uma pessoa colaboradora gerente!');
 }
