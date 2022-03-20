@@ -1,13 +1,12 @@
-const data = require('../data/zoo_data');
+const { species, hours } = require('../data/zoo_data');
 
-const { species, hours } = data;
-
-const dayData = (day) => species.reduce((objectDay, specie) => {
+const dayData = (day) => species.reduce((objectDay, { name, availability }) => {
   const object = objectDay;
-  if (specie.availability.includes(day)) {
+  if (availability.includes(day)) {
     object.officeHour = `Open from ${hours[day].open}am until ${hours[day].close}pm`;
-    object.exhibition.push(specie.name);
-  } else if (hours[day].open === 0 && hours[day].close === 0) {
+    object.exhibition.push(name);
+  }
+  if (hours[day].open === 0 && hours[day].close === 0) {
     object.officeHour = 'CLOSED';
     object.exhibition = 'The zoo will be closed!';
   }
@@ -15,17 +14,17 @@ const dayData = (day) => species.reduce((objectDay, specie) => {
 }, { officeHour: '', exhibition: [] });
 
 function getSchedule(scheduleTarget) {
-  if (species.some((specie) => specie.name === scheduleTarget)) {
-    return species.find((specie) => specie.name === scheduleTarget).availability;
+  if (species.some(({ name }) => name === scheduleTarget)) {
+    return species.find(({ name }) => name === scheduleTarget).availability;
   }
-  return Object.keys(hours).reduce((object, day) => {
-    const objectBase = object;
+  return Object.keys(hours).reduce((objectBase, day) => {
+    const object = objectBase;
     if (!scheduleTarget || !Object.keys(hours).includes(scheduleTarget)) {
-      objectBase[day] = dayData(day);
+      object[day] = dayData(day);
       return object;
     }
-    objectBase[scheduleTarget] = dayData(scheduleTarget);
-    return object;
+    object[scheduleTarget] = dayData(scheduleTarget);
+    return objectBase;
   }, {});
 }
 
