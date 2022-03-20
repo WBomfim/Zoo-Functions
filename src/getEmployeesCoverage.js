@@ -1,14 +1,11 @@
-const data = require('../data/zoo_data');
-
-const { employees, species } = data;
+const { employees, species } = require('../data/zoo_data');
 
 const getAnimal = (employeeId) =>
-  employees.find((employee) => employee.id === employeeId).responsibleFor
-    .map((specieId) => species.find((specie) => specie.id === specieId).name);
+  employees.find(({ id }) => id === employeeId).responsibleFor
+    .map((specieId) => species.find(({ id }) => id === specieId).name);
 
 const getLocationOfAnimales = (speciesNames) =>
-  speciesNames.map((specieName) => species
-    .find((specie) => specie.name === specieName).location);
+  speciesNames.map((specieName) => species.find(({ name }) => name === specieName).location);
 
 const employeeDataGenerator = (employeeIdentification) =>
   employees.reduce((objectData, employee) => {
@@ -22,22 +19,18 @@ const employeeDataGenerator = (employeeIdentification) =>
     return objectData;
   }, {});
 
-const checkIdentification = (employeeIdentification) => {
-  const identifocation = Object.values(employeeIdentification)[0];
-  return employees.some((employee) => Object.values(employee).includes(identifocation));
-};
+const checkIdentification = (employeeIdentification) =>
+  employees.some((employee) => Object.values(employee).includes(employeeIdentification));
 
 function getEmployeesCoverage(employeeIdentification) {
   if (!employeeIdentification) {
-    return employees.reduce((employeesData, employee) => {
-      employeesData.push(employeeDataGenerator(employee.id));
+    return employees.reduce((employeesData, { id }) => {
+      employeesData.push(employeeDataGenerator(id));
       return employeesData;
     }, []);
   }
-  if (checkIdentification(employeeIdentification)) {
-    const identifocation = Object.values(employeeIdentification)[0];
-    return employeeDataGenerator(identifocation);
-  }
+  const identification = Object.values(employeeIdentification)[0];
+  if (checkIdentification(identification)) return employeeDataGenerator(identification);
   throw new Error('Informações inválidas');
 }
 
