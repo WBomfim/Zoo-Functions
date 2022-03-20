@@ -1,23 +1,17 @@
-const data = require('../data/zoo_data');
+const { species } = require('../data/zoo_data');
 
-const { species } = data;
+const createObjectBase = () => species.reduce((objectLocale, { location }) => {
+  const object = objectLocale;
+  object[location] = [];
+  return objectLocale;
+}, {});
 
-const createObjectLocales = () => {
-  const filterAnimal = {};
-  species.forEach((animal) => {
-    filterAnimal[animal.location] = [];
-  });
-  return filterAnimal;
-};
-
-const notIncludeNames = (object) => {
-  Object.keys(object).forEach((key) => species.forEach((animal) => {
-    if (animal.location === key) {
-      object[key].push(animal.name);
-    }
-  }));
-  return object;
-};
+const notIncludeNames = () => species.reduce((objectBase, { location, name }) => {
+  if (Object.keys(createObjectBase()).includes(location)) {
+    objectBase[location].push(name);
+  }
+  return objectBase;
+}, createObjectBase());
 
 const sortedData = (animal, options) => {
   if (options.sex === undefined && options.sorted === true) {
@@ -31,7 +25,6 @@ const changedata = (animal, options) => {
   if (options.sex === undefined && options.sorted === undefined) {
     return animal.residents.map((resident) => resident.name);
   }
-
   if (options.sex !== undefined && options.sorted === undefined) {
     return animal.residents.filter((resident) =>
       resident.sex === options.sex).map((residentsCurr) => residentsCurr.name);
@@ -39,25 +32,18 @@ const changedata = (animal, options) => {
   return sortedData(animal, options);
 };
 
-const includeNames = (object, options) => {
-  Object.keys(object).forEach((key) => species.forEach((animal) => {
-    const animalNames = {};
-    if (animal.location === key) {
-      animalNames[animal.name] = changedata(animal, options);
-      object[key].push(animalNames);
-    }
-  }));
-  return object;
-};
+const includeNames = (options) => species.reduce((objectBase, specie) => {
+  const animalNames = {};
+  if (Object.keys(createObjectBase()).includes(specie.location)) {
+    animalNames[specie.name] = changedata(specie, options);
+    objectBase[specie.location].push(animalNames);
+  }
+  return objectBase;
+}, createObjectBase());
 
 function getAnimalMap(options) {
-  const filterAnimal = createObjectLocales();
-  if (!options || options.includeNames === undefined) {
-    notIncludeNames(filterAnimal);
-  } else {
-    includeNames(filterAnimal, options);
-  }
-  return filterAnimal;
+  if (!options || !options.includeNames) return notIncludeNames();
+  return includeNames(options);
 }
 
 module.exports = getAnimalMap;
