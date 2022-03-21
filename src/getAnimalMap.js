@@ -6,43 +6,32 @@ const createObjectBase = () => species.reduce((objectLocale, { location }) => {
   return objectLocale;
 }, {});
 
-const notIncludeNames = () => species.reduce((objectBase, { location, name }) => {
-  if (Object.keys(createObjectBase()).includes(location)) {
-    objectBase[location].push(name);
+const createData = ({ residents }, options) => {
+  if (!options.sex) {
+    return residents.map(({ name }) => name);
   }
-  return objectBase;
-}, createObjectBase());
-
-const sortedData = (animal, options) => {
-  if (options.sex === undefined && options.sorted === true) {
-    return animal.residents.map((resident) => resident.name).sort();
-  }
-  return animal.residents.filter((resident) =>
-    resident.sex === options.sex).map((residentsCurr) => residentsCurr.name).sort();
-};
-
-const changedata = (animal, options) => {
-  if (options.sex === undefined && options.sorted === undefined) {
-    return animal.residents.map((resident) => resident.name);
-  }
-  if (options.sex !== undefined && options.sorted === undefined) {
-    return animal.residents.filter((resident) =>
-      resident.sex === options.sex).map((residentsCurr) => residentsCurr.name);
-  }
-  return sortedData(animal, options);
+  return residents.filter(({ sex }) => sex === options.sex)
+    .map(({ name }) => name);
 };
 
 const includeNames = (options) => species.reduce((objectBase, specie) => {
   const animalNames = {};
-  if (Object.keys(createObjectBase()).includes(specie.location)) {
-    animalNames[specie.name] = changedata(specie, options);
-    objectBase[specie.location].push(animalNames);
+  if (!options.sorted) {
+    animalNames[specie.name] = createData(specie, options);
+  } else {
+    animalNames[specie.name] = createData(specie, options).sort();
   }
+  objectBase[specie.location].push(animalNames);
   return objectBase;
 }, createObjectBase());
 
 function getAnimalMap(options) {
-  if (!options || !options.includeNames) return notIncludeNames();
+  if (!options || !options.includeNames) {
+    return species.reduce((objectBase, { location, name }) => {
+      objectBase[location].push(name);
+      return objectBase;
+    }, createObjectBase());
+  }
   return includeNames(options);
 }
 
